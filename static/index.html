@@ -6,26 +6,115 @@
 <title>Smart Notes</title>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
-body { font-family: serif; margin: 20px; }
-.app { max-width: 700px; }
-header { margin-bottom: 20px; }
-.ai-badge { font-size: .75rem; }
-.ai-badge.enabled { color: green; }
-.ai-badge.disabled { color: gray; }
-.note-form { border: 1px solid #ccc; padding: 10px; margin-bottom: 20px; }
-.note-form input, .note-form textarea { width: 100%; margin-bottom: 8px; font-family: serif; }
-.note-form textarea { height: 80px; }
-.btn { cursor: pointer; margin-right: 4px; }
-.note-card { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
-.note-card .content { white-space: pre-wrap; margin: 8px 0; }
-.note-card .meta { font-size: .8rem; color: gray; }
-.note-card .actions { margin-top: 8px; }
-.ai-result { margin-top: 8px; border: 1px solid #ccc; padding: 8px; }
-.ai-result pre { white-space: pre-wrap; font-family: serif; }
-.edit-form input, .edit-form textarea { width: 100%; margin-bottom: 6px; font-family: serif; }
-.edit-form textarea { height: 60px; }
-.spinner { display: inline-block; }
-.spinner::after { content: "Loading..."; }
+:root {
+  --bg: #282a36;
+  --current: #44475a;
+  --fg: #f8f8f2;
+  --comment: #6272a4;
+  --cyan: #8be9fd;
+  --green: #50fa7b;
+  --orange: #ffb86c;
+  --pink: #ff79c6;
+  --purple: #bd93f9;
+  --red: #ff5555;
+  --yellow: #f1fa8c;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  margin: 0; padding: 20px;
+  background: var(--bg); color: var(--fg);
+  min-height: 100vh;
+}
+.app { max-width: 720px; margin: 0 auto; }
+header { margin-bottom: 28px; }
+header h1 {
+  font-size: 2rem; margin: 0 0 6px 0;
+  color: var(--purple);
+}
+header p { color: var(--comment); margin: 0; font-size: .95rem; }
+.ai-badge {
+  font-size: .7rem; padding: 2px 8px; border-radius: 10px;
+  font-weight: 600; vertical-align: middle; margin-left: 8px;
+}
+.ai-badge.enabled { background: var(--green); color: var(--bg); }
+.ai-badge.disabled { background: var(--comment); color: var(--fg); }
+
+/* Form */
+.note-form {
+  background: var(--current); border: 1px solid var(--comment);
+  border-radius: 10px; padding: 16px; margin-bottom: 28px;
+}
+.note-form input, .note-form textarea {
+  width: 100%; margin-bottom: 10px; padding: 10px 12px;
+  background: var(--bg); color: var(--fg);
+  border: 1px solid var(--comment); border-radius: 6px;
+  font-family: inherit; font-size: .95rem;
+  outline: none; transition: border-color .2s;
+}
+.note-form input:focus, .note-form textarea:focus { border-color: var(--purple); }
+.note-form textarea { height: 90px; resize: vertical; }
+
+/* Buttons */
+.btn {
+  cursor: pointer; margin-right: 4px; padding: 7px 16px;
+  border: none; border-radius: 6px; font-size: .85rem;
+  font-weight: 600; transition: opacity .15s, transform .1s;
+  color: var(--bg);
+}
+.btn:hover { opacity: .85; }
+.btn:active { transform: scale(.97); }
+.form-actions .btn { background: var(--purple); }
+.note-card .header-btns .btn { background: var(--comment); color: var(--fg); font-size: .78rem; padding: 4px 10px; }
+.actions .btn { background: var(--current); color: var(--cyan); border: 1px solid var(--comment); font-size: .78rem; }
+.actions .btn:hover { border-color: var(--cyan); }
+.edit-actions .btn { background: var(--green); color: var(--bg); }
+.edit-actions .btn + .btn { background: var(--comment); color: var(--fg); }
+
+/* Note cards */
+.note-card {
+  background: var(--current); border: 1px solid var(--comment);
+  border-radius: 10px; padding: 16px; margin-bottom: 14px;
+  transition: border-color .2s;
+}
+.note-card:hover { border-color: var(--purple); }
+.note-card-header { display: flex; justify-content: space-between; align-items: center; }
+.note-card-header h3 { margin: 0; color: var(--pink); font-size: 1.1rem; }
+.note-card .content { white-space: pre-wrap; margin: 10px 0; color: var(--fg); line-height: 1.5; }
+.note-card .meta { font-size: .78rem; color: var(--comment); }
+.note-card .actions { margin-top: 12px; display: flex; gap: 6px; }
+
+/* AI result */
+.ai-result {
+  margin-top: 12px; border: 1px solid var(--green);
+  border-radius: 8px; padding: 12px; background: rgba(80,250,123,.06);
+}
+.ai-result h4 { margin: 0 0 6px; color: var(--green); font-size: .9rem; text-transform: capitalize; }
+.ai-result pre { white-space: pre-wrap; font-family: 'Fira Code', 'Cascadia Code', monospace; font-size: .88rem; color: var(--fg); margin: 0; }
+
+/* Edit form */
+.edit-form input, .edit-form textarea {
+  width: 100%; margin-bottom: 8px; padding: 10px 12px;
+  background: var(--bg); color: var(--fg);
+  border: 1px solid var(--comment); border-radius: 6px;
+  font-family: inherit; font-size: .95rem; outline: none;
+}
+.edit-form input:focus, .edit-form textarea:focus { border-color: var(--purple); }
+.edit-form textarea { height: 70px; resize: vertical; }
+.edit-actions { display: flex; gap: 6px; }
+
+/* Spinner */
+.spinner { display: inline-block; color: var(--purple); }
+.spinner::after { content: "⏳ Thinking..."; }
+
+/* Empty state */
+.note-list p { color: var(--comment); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--comment); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--purple); }
 </style>
 </head>
 <body>
